@@ -1,12 +1,23 @@
-
 #include <Geode/Geode.hpp>
 #include <Geode/modify/GJBaseGameLayer.hpp>
+#include <Geode/modify/PlayLayer.hpp>
 
 #include "InputTracker.hpp"
+#include "FrameTiming.hpp"
 
 using namespace geode::prelude;
 
-class $modify(GJBaseGameLayer) {
+static superbuffer::FrameTiming frameTiming;
+
+class $modify(SuperBufferPlayLayer, PlayLayer) {
+    void update(float dt) {
+        PlayLayer::update(dt);
+
+        frameTiming.updateFrame();
+    }
+};
+
+class $modify(SuperBufferGameLayer, GJBaseGameLayer) {
     void handleButton(
         bool down,
         int button,
@@ -25,19 +36,20 @@ class $modify(GJBaseGameLayer) {
             button
         );
 
-        const char* modeName =
-            this->m_isPracticeMode
-            ? "PRACTICE"
-            : "NORMAL";
-
-        const char* playerName =
-            isPlayer1 ? "P1" : "P2";
+        const auto frameEvent = frameTiming.recordInput(
+            mode,
+            superbuffer::GameMode::Cube,
+            isPlayer1,
+            down,
+            button
+        );
 
         log::info(
-            "SUPERBUFFER TRACKER: Mode={} Player={} "
+            "SUPERBUFFER FRAME: Frame={} Mode={} Player={} "
             "Button={} State={} Event={} Gap={}us",
-            modeName,
-            playerName,
+            frameEvent.frame,
+            this->m_isPracticeMode ? "PRACTICE" : "NORMAL",
+            isPlayer1 ? "P1" : "P2",
             button,
             down ? "PRESSED" : "RELEASED",
             event.sequence,

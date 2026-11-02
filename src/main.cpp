@@ -5,6 +5,7 @@
 #include "InputTracker.hpp"
 #include "FrameTiming.hpp"
 #include "ModeDetector.hpp"
+#include "ModeSettings.hpp"
 
 using namespace geode::prelude;
 
@@ -73,20 +74,25 @@ class $modify(SuperBufferGameLayer, GJBaseGameLayer) {
             button
         );
 
+        const auto bufferWindow =
+            superbuffer::ModeSettings::getBufferWindow(gameMode);
+
         const auto frameEvent = frameTiming.recordInput(
             mode,
             gameMode,
             isPlayer1,
             down,
-            button
+            button,
+            bufferWindow
         );
 
         log::info(
             "SUPERBUFFER: Frame={} GameMode={} "
-            "Mode={} Player={} Button={} State={} "
+            "Buffer={} Mode={} Player={} Button={} State={} "
             "Event={} Gap={}us",
             frameEvent.frame,
             getGameModeName(gameMode),
+            bufferWindow,
             this->m_isPracticeMode ? "PRACTICE" : "NORMAL",
             isPlayer1 ? "P1" : "P2",
             button,

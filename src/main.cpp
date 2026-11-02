@@ -6,6 +6,7 @@
 #include "FrameTiming.hpp"
 #include "ModeDetector.hpp"
 #include "ModeSettings.hpp"
+#include "InputBuffer.hpp"
 
 using namespace geode::prelude;
 
@@ -42,6 +43,7 @@ class $modify(SuperBufferGameLayer, GJBaseGameLayer) {
         bool isPlayer1
     ) {
         static superbuffer::InputTracker tracker;
+        static bool bufferSelfTestDone = false;
 
         const auto mode = this->m_isPracticeMode
             ? superbuffer::PlayMode::Practice
@@ -76,6 +78,64 @@ class $modify(SuperBufferGameLayer, GJBaseGameLayer) {
 
         const auto bufferWindow =
             superbuffer::ModeSettings::getBufferWindow(gameMode);
+
+        // Safe queue self-test. Runs once.
+        // This does not modify gameplay input.
+
+        if (!bufferSelfTestDone) {
+            superbuffer::InputBuffer testBuffer;
+            superbuffer::BufferedInput next;
+
+            const auto frame =
+                frameTiming.getCurrentFrame();
+
+            bool pressQueued = testBuffer.enqueue(
+                frame,
+                button,
+                true,
+                isPlayer1,
+                bufferWindow
+            );
+
+            bool releaseQueued = testBuffer.enqueue(
+                frame + 1,
+                button,
+                false,
+                isPlayer1,
+                bufferWindow
+            );
+
+            bool firstFound =
+                testBuffer.peekNext(frame, next);
+
+            bool firstIsPress =
+                firstFound && next.pressed;
+
+            bool firstConsumed =
+                testBuffer.consumeNext();
+
+            bool secondFound =
+                testBuffer.peekNext(frame + 1, next);
+
+            bool secondIsRelease =
+                secondFound && !next.pressed;
+
+            bool secondConsumed =
+                testBuffer.consumeNext();
+
+            log::info(
+                "SUPERBUFFER: Queue Test "
+                "Press={} Release={} Order={} "
+                "Consumed={} Empty={}",
+                pressQueued,
+                releaseQueued,
+                firstIsPress && secondIsRelease,
+                firstConsumed && secondConsumed,
+                testBuffer.empty()
+            );
+
+            bufferSelfTestDone = true;
+        }
 
         const auto frameEvent = frameTiming.recordInput(
             mode,

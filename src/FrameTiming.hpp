@@ -1,8 +1,11 @@
+
 #pragma once
 
 #include <array>
 #include <cstdint>
 #include <cstddef>
+
+#include "InputTracker.hpp"
 
 namespace superbuffer {
 
@@ -16,11 +19,6 @@ enum class GameMode : std::size_t {
     Spider,
     Swing,
     Count
-};
-
-enum class PlayMode : std::size_t {
-    Normal = 0,
-    Practice
 };
 
 struct FrameInput {
@@ -41,10 +39,7 @@ private:
 
     std::array<
         std::array<
-            std::array<
-                FrameProfile,
-                2
-            >,
+            std::array<FrameProfile, 2>,
             static_cast<std::size_t>(GameMode::Count)
         >,
         2

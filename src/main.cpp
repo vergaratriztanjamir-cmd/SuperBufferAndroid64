@@ -11,6 +11,7 @@
 using namespace geode::prelude;
 
 static superbuffer::FrameTiming frameTiming;
+static bool bufferSelfTestDone = false;
 
 static const char* getGameModeName(
     superbuffer::GameMode mode
@@ -30,11 +31,61 @@ static const char* getGameModeName(
     }
 }
 
+static void runBufferSelfTest() {
+    if (bufferSelfTestDone) {
+        return;
+    }
+
+    superbuffer::InputBuffer testBuffer;
+    superbuffer::BufferedInput next;
+
+    bool pressQueued = testBuffer.enqueue(
+        100, 1, true, true, 3
+    );
+
+    bool releaseQueued = testBuffer.enqueue(
+        101, 1, false, true, 3
+    );
+
+    bool firstFound =
+        testBuffer.peekNext(100, next);
+
+    bool firstIsPress =
+        firstFound && next.pressed;
+
+    bool firstConsumed =
+        testBuffer.consumeNext();
+
+    bool secondFound =
+        testBuffer.peekNext(101, next);
+
+    bool secondIsRelease =
+        secondFound && !next.pressed;
+
+    bool secondConsumed =
+        testBuffer.consumeNext();
+
+    log::info(
+        "SUPERBUFFER: Queue Test "
+        "Press={} Release={} Order={} "
+        "Consumed={} Empty={}",
+        pressQueued,
+        releaseQueued,
+        firstIsPress && secondIsRelease,
+        firstConsumed && secondConsumed,
+        testBuffer.empty()
+    );
+
+    bufferSelfTestDone = true;
+}
+
 class $modify(SuperBufferGameLayer, GJBaseGameLayer) {
 
     void update(float dt) {
         GJBaseGameLayer::update(dt);
+
         frameTiming.updateFrame();
+        runBufferSelfTest();
     }
 
     void handleButton(
@@ -43,7 +94,6 @@ class $modify(SuperBufferGameLayer, GJBaseGameLayer) {
         bool isPlayer1
     ) {
         static superbuffer::InputTracker tracker;
-        static bool bufferSelfTestDone = false;
 
         const auto mode = this->m_isPracticeMode
             ? superbuffer::PlayMode::Practice
@@ -62,80 +112,17 @@ class $modify(SuperBufferGameLayer, GJBaseGameLayer) {
             );
 
             GJBaseGameLayer::handleButton(
-                down,
-                button,
-                isPlayer1
+                down, button, isPlayer1
             );
             return;
         }
 
         const auto event = tracker.record(
-            mode,
-            isPlayer1,
-            down,
-            button
+            mode, isPlayer1, down, button
         );
 
         const auto bufferWindow =
             superbuffer::ModeSettings::getBufferWindow(gameMode);
-
-        // Safe queue self-test. Runs once.
-        // This does not modify gameplay input.
-
-        if (!bufferSelfTestDone) {
-            superbuffer::InputBuffer testBuffer;
-            superbuffer::BufferedInput next;
-
-            const auto frame =
-                frameTiming.getCurrentFrame();
-
-            bool pressQueued = testBuffer.enqueue(
-                frame,
-                button,
-                true,
-                isPlayer1,
-                bufferWindow
-            );
-
-            bool releaseQueued = testBuffer.enqueue(
-                frame + 1,
-                button,
-                false,
-                isPlayer1,
-                bufferWindow
-            );
-
-            bool firstFound =
-                testBuffer.peekNext(frame, next);
-
-            bool firstIsPress =
-                firstFound && next.pressed;
-
-            bool firstConsumed =
-                testBuffer.consumeNext();
-
-            bool secondFound =
-                testBuffer.peekNext(frame + 1, next);
-
-            bool secondIsRelease =
-                secondFound && !next.pressed;
-
-            bool secondConsumed =
-                testBuffer.consumeNext();
-
-            log::info(
-                "SUPERBUFFER: Queue Test "
-                "Press={} Release={} Order={} "
-                "Consumed={} Empty={}",
-                pressQueued,
-                releaseQueued,
-                firstIsPress && secondIsRelease,
-                firstConsumed && secondConsumed,
-                testBuffer.empty()
-            );
-
-            bufferSelfTestDone = true;
-        }
 
         const auto frameEvent = frameTiming.recordInput(
             mode,
@@ -162,9 +149,7 @@ class $modify(SuperBufferGameLayer, GJBaseGameLayer) {
         );
 
         GJBaseGameLayer::handleButton(
-            down,
-            button,
-            isPlayer1
+            down, button, isPlayer1
         );
     }
 };

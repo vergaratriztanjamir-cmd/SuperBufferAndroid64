@@ -4,10 +4,29 @@
 
 #include "InputTracker.hpp"
 #include "FrameTiming.hpp"
+#include "ModeDetector.hpp"
 
 using namespace geode::prelude;
 
 static superbuffer::FrameTiming frameTiming;
+
+static const char* getGameModeName(
+    superbuffer::GameMode mode
+) {
+    using superbuffer::GameMode;
+
+    switch (mode) {
+        case GameMode::Cube:   return "CUBE";
+        case GameMode::Ship:   return "SHIP";
+        case GameMode::Ball:   return "BALL";
+        case GameMode::UFO:    return "UFO";
+        case GameMode::Wave:   return "WAVE";
+        case GameMode::Robot:  return "ROBOT";
+        case GameMode::Spider: return "SPIDER";
+        case GameMode::Swing:  return "SWING";
+        default:               return "UNKNOWN";
+    }
+}
 
 class $modify(SuperBufferGameLayer, GJBaseGameLayer) {
 
@@ -27,6 +46,26 @@ class $modify(SuperBufferGameLayer, GJBaseGameLayer) {
             ? superbuffer::PlayMode::Practice
             : superbuffer::PlayMode::Normal;
 
+        PlayerObject* player = isPlayer1
+            ? this->m_player1
+            : this->m_player2;
+
+        const auto gameMode =
+            superbuffer::ModeDetector::detect(player);
+
+        if (gameMode == superbuffer::GameMode::Count) {
+            log::warn(
+                "SUPERBUFFER: Player object unavailable!"
+            );
+
+            GJBaseGameLayer::handleButton(
+                down,
+                button,
+                isPlayer1
+            );
+            return;
+        }
+
         const auto event = tracker.record(
             mode,
             isPlayer1,
@@ -36,16 +75,18 @@ class $modify(SuperBufferGameLayer, GJBaseGameLayer) {
 
         const auto frameEvent = frameTiming.recordInput(
             mode,
-            superbuffer::GameMode::Cube,
+            gameMode,
             isPlayer1,
             down,
             button
         );
 
         log::info(
-            "SUPERBUFFER FRAME: Frame={} Mode={} Player={} "
-            "Button={} State={} Event={} Gap={}us",
+            "SUPERBUFFER: Frame={} GameMode={} "
+            "Mode={} Player={} Button={} State={} "
+            "Event={} Gap={}us",
             frameEvent.frame,
+            getGameModeName(gameMode),
             this->m_isPracticeMode ? "PRACTICE" : "NORMAL",
             isPlayer1 ? "P1" : "P2",
             button,

@@ -59,7 +59,8 @@ public:
         GameMode gameMode,
         bool isPlayer1,
         bool pressed,
-        int button
+        int button,
+        uint32_t bufferWindow
     ) {
         auto& profile = profiles[
             static_cast<std::size_t>(playMode)
@@ -71,6 +72,7 @@ public:
 
         profile.totalInputs++;
         profile.lastInputFrame = currentFrame;
+        profile.bufferWindow = bufferWindow;
 
         return {
             currentFrame,

@@ -9,5 +9,91 @@
   "version": "v0.1.0",
   "developer": "Tragedy",
   "description": "Adaptive input buffering for Android64.",
-  "settings": {}
+  "settings": {
+    "buffer-title": {
+      "type": "title",
+      "name": "Game Mode Buffer Windows",
+      "description": "Customize the frame window for each game mode."
+    },
+    "cube-buffer": {
+      "name": "Cube Buffer",
+      "type": "int",
+      "default": 3,
+      "min": 0,
+      "max": 12,
+      "control": {
+        "slider": true
+      }
+    },
+    "ship-buffer": {
+      "name": "Ship Buffer",
+      "type": "int",
+      "default": 3,
+      "min": 0,
+      "max": 12,
+      "control": {
+        "slider": true
+      }
+    },
+    "ball-buffer": {
+      "name": "Ball Buffer",
+      "type": "int",
+      "default": 3,
+      "min": 0,
+      "max": 12,
+      "control": {
+        "slider": true
+      }
+    },
+    "ufo-buffer": {
+      "name": "UFO Buffer",
+      "type": "int",
+      "default": 3,
+      "min": 0,
+      "max": 12,
+      "control": {
+        "slider": true
+      }
+    },
+    "wave-buffer": {
+      "name": "Wave Buffer",
+      "type": "int",
+      "default": 3,
+      "min": 0,
+      "max": 12,
+      "control": {
+        "slider": true
+      }
+    },
+    "robot-buffer": {
+      "name": "Robot Buffer",
+      "type": "int",
+      "default": 3,
+      "min": 0,
+      "max": 12,
+      "control": {
+        "slider": true
+      }
+    },
+    "spider-buffer": {
+      "name": "Spider Buffer",
+      "type": "int",
+      "default": 3,
+      "min": 0,
+      "max": 12,
+      "control": {
+        "slider": true
+      }
+    },
+    "swing-buffer": {
+      "name": "Swing Buffer",
+      "type": "int",
+      "default": 3,
+      "min": 0,
+      "max": 12,
+      "control": {
+        "slider": true
+      }
+    }
+  }
 }

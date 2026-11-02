@@ -1,6 +1,6 @@
 
 {
-  "geode": "v5.11.2",
+  "geode": "5.11.2",
   "gd": {
     "android": "2.2081"
   },
@@ -8,6 +8,6 @@
   "name": "SuperBuffer",
   "version": "v0.1.0",
   "developer": "Tragedy",
-  "description": "Adaptive input buffering and timing assistance for Android64.",
+  "description": "Adaptive input buffering for Android64.",
   "settings": {}
 }

@@ -1,13 +1,23 @@
 
 #include <Geode/Geode.hpp>
+#include <Geode/modify/GJBaseGameLayer.hpp>
 
 using namespace geode::prelude;
 
-$on_mod(Loaded) {
-    log::info("==============================");
-    log::info("SUPERBUFFER INITIALIZED!");
-    log::info("Version: 0.1.0");
-    log::info("Platform target: Android64");
-    log::info("Initialization successful.");
-    log::info("==============================");
-}
+class $modify(GJBaseGameLayer) {
+    void handleButton(bool down, int button, bool isPlayer1) {
+
+        log::info(
+            "SUPERBUFFER INPUT DETECTED: {} | Button: {} | Player: {}",
+            down ? "PRESSED" : "RELEASED",
+            button,
+            isPlayer1 ? "P1" : "P2"
+        );
+
+        GJBaseGameLayer::handleButton(
+            down,
+            button,
+            isPlayer1
+        );
+    }
+};

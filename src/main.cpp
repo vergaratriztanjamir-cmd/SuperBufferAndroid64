@@ -148,8 +148,20 @@ class $modify(SuperBufferGameLayer, GJBaseGameLayer) {
             event.intervalMicros
         );
 
+        const auto queuedBefore =
+            this->m_queuedButtons.size();
+
         GJBaseGameLayer::handleButton(
             down, button, isPlayer1
+        );
+
+        const auto queuedAfter =
+            this->m_queuedButtons.size();
+
+        log::info(
+            "SUPERBUFFER: Native Queue Before={} After={}",
+            queuedBefore,
+            queuedAfter
         );
     }
 };

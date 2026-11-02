@@ -1,6 +1,6 @@
+
 #include <Geode/Geode.hpp>
 #include <Geode/modify/GJBaseGameLayer.hpp>
-#include <Geode/modify/PlayLayer.hpp>
 
 #include "InputTracker.hpp"
 #include "FrameTiming.hpp"
@@ -9,15 +9,13 @@ using namespace geode::prelude;
 
 static superbuffer::FrameTiming frameTiming;
 
-class $modify(SuperBufferPlayLayer, PlayLayer) {
-    void update(float dt) {
-        PlayLayer::update(dt);
+class $modify(SuperBufferGameLayer, GJBaseGameLayer) {
 
+    void update(float dt) {
+        GJBaseGameLayer::update(dt);
         frameTiming.updateFrame();
     }
-};
 
-class $modify(SuperBufferGameLayer, GJBaseGameLayer) {
     void handleButton(
         bool down,
         int button,

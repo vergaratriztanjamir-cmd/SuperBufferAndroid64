@@ -172,6 +172,51 @@ class $modify(SuperBufferGameLayer, GJBaseGameLayer) {
         }
     }
 
+    void processCommands(
+        float dt,
+        bool isHalfTick,
+        bool isLastTick
+    ) {
+        const auto before =
+            this->m_queuedButtons.size();
+
+        if (before > 0) {
+            log::info(
+                "SUPERBUFFER: Command Tick BEFORE "
+                "Frame={} DT={} Timestamp={} "
+                "HalfTick={} LastTick={} "
+                "Count={} BetweenSteps={} ClickBetweenSteps={}",
+                frameTiming.getCurrentFrame(),
+                dt,
+                this->m_timestamp,
+                isHalfTick,
+                isLastTick,
+                before,
+                this->m_isBetweenSteps,
+                this->m_clickBetweenSteps
+            );
+        }
+
+        GJBaseGameLayer::processCommands(
+            dt,
+            isHalfTick,
+            isLastTick
+        );
+
+        const auto after =
+            this->m_queuedButtons.size();
+
+        if (before > 0 || after > 0) {
+            log::info(
+                "SUPERBUFFER: Command Tick AFTER "
+                "Frame={} Timestamp={} Count={}",
+                frameTiming.getCurrentFrame(),
+                this->m_timestamp,
+                after
+            );
+        }
+    }
+
     void processQueuedButtons(
         float dt,
         bool clearInputQueue

@@ -171,4 +171,55 @@ class $modify(SuperBufferGameLayer, GJBaseGameLayer) {
             );
         }
     }
+
+    void processQueuedButtons(
+        float dt,
+        bool clearInputQueue
+    ) {
+        const auto before =
+            this->m_queuedButtons.size();
+
+        if (before > 0) {
+            log::info(
+                "SUPERBUFFER: Queue Process "
+                "BEFORE Count={} Clear={}",
+                before,
+                clearInputQueue
+            );
+
+            for (std::size_t i = 0; i < before; i++) {
+                const auto& command =
+                    this->m_queuedButtons[i];
+
+                log::info(
+                    "SUPERBUFFER: Queue Command "
+                    "Index={} Button={} Push={} P2={} "
+                    "Step={} Timestamp={}",
+                    i,
+                    static_cast<int>(command.m_button),
+                    command.m_isPush,
+                    command.m_isPlayer2,
+                    command.m_step,
+                    command.m_timestamp
+                );
+            }
+        }
+
+        GJBaseGameLayer::processQueuedButtons(
+            dt,
+            clearInputQueue
+        );
+
+        const auto after =
+            this->m_queuedButtons.size();
+
+        if (before > 0 || after > 0) {
+            log::info(
+                "SUPERBUFFER: Queue Process "
+                "AFTER Count={} Clear={}",
+                after,
+                clearInputQueue
+            );
+        }
+    }
 };

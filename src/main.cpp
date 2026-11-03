@@ -172,6 +172,27 @@ class $modify(SuperBufferGameLayer, GJBaseGameLayer) {
         }
     }
 
+    bool shouldUseSubstepForButton(float dt) {
+        const bool result =
+            GJBaseGameLayer::shouldUseSubstepForButton(dt);
+
+        if (result || !this->m_queuedButtons.empty()) {
+            log::info(
+                "SUPERBUFFER: Substep Decision "
+                "Result={} DT={} Timestamp={} "
+                "Queue={} BetweenSteps={} ClickBetweenSteps={}",
+                result,
+                dt,
+                this->m_timestamp,
+                this->m_queuedButtons.size(),
+                this->m_isBetweenSteps,
+                this->m_clickBetweenSteps
+            );
+        }
+
+        return result;
+    }
+
     void processCommands(
         float dt,
         bool isHalfTick,

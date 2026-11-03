@@ -1,3 +1,4 @@
+
 #include <Geode/Geode.hpp>
 #include <Geode/modify/GJBaseGameLayer.hpp>
 
@@ -35,44 +36,85 @@ static void runBufferSelfTest() {
         return;
     }
 
-    superbuffer::InputBuffer testBuffer;
-    superbuffer::BufferedInput next;
+    using superbuffer::PlayMode;
+    using superbuffer::InputBuffer;
+    using superbuffer::BufferedInput;
 
-    bool pressQueued = testBuffer.enqueue(
-        100, 1, true, true, 3
+    InputBuffer testBuffer;
+    BufferedInput event;
+
+    // Add an event to each independent queue.
+    bool normalP1 = testBuffer.enqueue(
+        PlayMode::Normal, 100, 1, true, true, 3
     );
 
-    bool releaseQueued = testBuffer.enqueue(
-        101, 1, false, true, 3
+    bool normalP2 = testBuffer.enqueue(
+        PlayMode::Normal, 100, 1, true, false, 3
     );
 
-    bool firstFound =
-        testBuffer.peekNext(100, next);
+    bool practiceP1 = testBuffer.enqueue(
+        PlayMode::Practice, 100, 1, false, true, 3
+    );
 
-    bool firstIsPress =
-        firstFound && next.pressed;
+    bool practiceP2 = testBuffer.enqueue(
+        PlayMode::Practice, 100, 1, false, false, 3
+    );
 
-    bool firstConsumed =
-        testBuffer.consumeNext();
+    // Check Normal P1.
+    bool foundNormalP1 =
+        testBuffer.peekNext(
+            PlayMode::Normal, true, 100, event
+        ) && event.pressed && event.isPlayer1;
 
-    bool secondFound =
-        testBuffer.peekNext(101, next);
+    // Check Normal P2.
+    bool foundNormalP2 =
+        testBuffer.peekNext(
+            PlayMode::Normal, false, 100, event
+        ) && event.pressed && !event.isPlayer1;
 
-    bool secondIsRelease =
-        secondFound && !next.pressed;
+    // Check Practice P1.
+    bool foundPracticeP1 =
+        testBuffer.peekNext(
+            PlayMode::Practice, true, 100, event
+        ) && !event.pressed && event.isPlayer1;
 
-    bool secondConsumed =
-        testBuffer.consumeNext();
+    // Check Practice P2.
+    bool foundPracticeP2 =
+        testBuffer.peekNext(
+            PlayMode::Practice, false, 100, event
+        ) && !event.pressed && !event.isPlayer1;
+
+    // Confirm that all four queues are separate.
+    bool isolated =
+        testBuffer.size(PlayMode::Normal, true) == 1 &&
+        testBuffer.size(PlayMode::Normal, false) == 1 &&
+        testBuffer.size(PlayMode::Practice, true) == 1 &&
+        testBuffer.size(PlayMode::Practice, false) == 1;
+
+    // Consume all four events.
+    bool consumed =
+        testBuffer.consumeNext(PlayMode::Normal, true) &&
+        testBuffer.consumeNext(PlayMode::Normal, false) &&
+        testBuffer.consumeNext(PlayMode::Practice, true) &&
+        testBuffer.consumeNext(PlayMode::Practice, false);
+
+    // Confirm all queues are empty.
+    bool allEmpty =
+        testBuffer.empty(PlayMode::Normal, true) &&
+        testBuffer.empty(PlayMode::Normal, false) &&
+        testBuffer.empty(PlayMode::Practice, true) &&
+        testBuffer.empty(PlayMode::Practice, false);
 
     log::info(
-        "SUPERBUFFER: Queue Test "
-        "Press={} Release={} Order={} "
+        "SUPERBUFFER: Four Queue Test "
+        "Enqueue={} Detect={} Isolated={} "
         "Consumed={} Empty={}",
-        pressQueued,
-        releaseQueued,
-        firstIsPress && secondIsRelease,
-        firstConsumed && secondConsumed,
-        testBuffer.empty()
+        normalP1 && normalP2 && practiceP1 && practiceP2,
+        foundNormalP1 && foundNormalP2 &&
+        foundPracticeP1 && foundPracticeP2,
+        isolated,
+        consumed,
+        allEmpty
     );
 
     bufferSelfTestDone = true;

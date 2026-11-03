@@ -1,4 +1,3 @@
-
 #include <Geode/Geode.hpp>
 #include <Geode/modify/GJBaseGameLayer.hpp>
 
@@ -148,20 +147,28 @@ class $modify(SuperBufferGameLayer, GJBaseGameLayer) {
             event.intervalMicros
         );
 
-        const auto queuedBefore =
-            this->m_queuedButtons.size();
-
         GJBaseGameLayer::handleButton(
             down, button, isPlayer1
         );
 
-        const auto queuedAfter =
+        const auto queuedCount =
             this->m_queuedButtons.size();
 
-        log::info(
-            "SUPERBUFFER: Native Queue Before={} After={}",
-            queuedBefore,
-            queuedAfter
-        );
+        if (queuedCount > 0) {
+            const auto& queued =
+                this->m_queuedButtons[queuedCount - 1];
+
+            log::info(
+                "SUPERBUFFER: Native Input "
+                "Count={} Button={} Push={} P2={} "
+                "Step={} Timestamp={}",
+                queuedCount,
+                static_cast<int>(queued.m_button),
+                queued.m_isPush,
+                queued.m_isPlayer2,
+                queued.m_step,
+                queued.m_timestamp
+            );
+        }
     }
 };

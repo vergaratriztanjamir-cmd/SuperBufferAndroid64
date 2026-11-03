@@ -43,7 +43,6 @@ static void runBufferSelfTest() {
     InputBuffer testBuffer;
     BufferedInput event;
 
-    // Add an event to each independent queue.
     bool normalP1 = testBuffer.enqueue(
         PlayMode::Normal, 100, 1, true, true, 3
     );
@@ -60,45 +59,38 @@ static void runBufferSelfTest() {
         PlayMode::Practice, 100, 1, false, false, 3
     );
 
-    // Check Normal P1.
     bool foundNormalP1 =
         testBuffer.peekNext(
             PlayMode::Normal, true, 100, event
         ) && event.pressed && event.isPlayer1;
 
-    // Check Normal P2.
     bool foundNormalP2 =
         testBuffer.peekNext(
             PlayMode::Normal, false, 100, event
         ) && event.pressed && !event.isPlayer1;
 
-    // Check Practice P1.
     bool foundPracticeP1 =
         testBuffer.peekNext(
             PlayMode::Practice, true, 100, event
         ) && !event.pressed && event.isPlayer1;
 
-    // Check Practice P2.
     bool foundPracticeP2 =
         testBuffer.peekNext(
             PlayMode::Practice, false, 100, event
         ) && !event.pressed && !event.isPlayer1;
 
-    // Confirm that all four queues are separate.
     bool isolated =
         testBuffer.size(PlayMode::Normal, true) == 1 &&
         testBuffer.size(PlayMode::Normal, false) == 1 &&
         testBuffer.size(PlayMode::Practice, true) == 1 &&
         testBuffer.size(PlayMode::Practice, false) == 1;
 
-    // Consume all four events.
     bool consumed =
         testBuffer.consumeNext(PlayMode::Normal, true) &&
         testBuffer.consumeNext(PlayMode::Normal, false) &&
         testBuffer.consumeNext(PlayMode::Practice, true) &&
         testBuffer.consumeNext(PlayMode::Practice, false);
 
-    // Confirm all queues are empty.
     bool allEmpty =
         testBuffer.empty(PlayMode::Normal, true) &&
         testBuffer.empty(PlayMode::Normal, false) &&
@@ -156,6 +148,20 @@ class $modify(SuperBufferGameLayer, GJBaseGameLayer) {
                 down, button, isPlayer1
             );
             return;
+        }
+
+        // Cube ground-state diagnostic.
+        if (gameMode == superbuffer::GameMode::Cube) {
+            log::info(
+                "SUPERBUFFER: Cube Ground State "
+                "Player={} Ground={} Ground2={} "
+                "JumpBuffered={} Dead={}",
+                isPlayer1 ? "P1" : "P2",
+                player->m_isOnGround,
+                player->m_isOnGround2,
+                player->m_jumpBuffered,
+                player->m_isDead
+            );
         }
 
         const auto event = tracker.record(

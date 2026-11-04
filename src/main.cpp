@@ -119,70 +119,6 @@ class $modify(SuperBufferGameLayer, GJBaseGameLayer) {
 
         frameTiming.updateFrame();
         runBufferSelfTest();
-
-        // Track ground transitions separately for P1 and P2.
-        static bool previousP1Ground = false;
-        static bool previousP2Ground = false;
-        static bool initialized = false;
-
-        auto logPlayerGround = [](
-            PlayerObject* player,
-            const char* name,
-            bool& previousGround
-        ) {
-            if (!player || player->m_isDead) {
-                return;
-            }
-
-            const bool grounded =
-                player->m_isOnGround ||
-                player->m_isOnGround2;
-
-            if (grounded != previousGround) {
-                log::info(
-                    "SUPERBUFFER: Ground Transition "
-                    "Player={} Ground={} Ground2={} "
-                    "Combined={} JumpBuffered={}",
-                    name,
-                    player->m_isOnGround,
-                    player->m_isOnGround2,
-                    grounded,
-                    player->m_jumpBuffered
-                );
-
-                previousGround = grounded;
-            }
-        };
-
-        if (!initialized) {
-            previousP1Ground =
-                this->m_player1 &&
-                (
-                    this->m_player1->m_isOnGround ||
-                    this->m_player1->m_isOnGround2
-                );
-
-            previousP2Ground =
-                this->m_player2 &&
-                (
-                    this->m_player2->m_isOnGround ||
-                    this->m_player2->m_isOnGround2
-                );
-
-            initialized = true;
-        }
-
-        logPlayerGround(
-            this->m_player1,
-            "P1",
-            previousP1Ground
-        );
-
-        logPlayerGround(
-            this->m_player2,
-            "P2",
-            previousP2Ground
-        );
     }
 
     void handleButton(
@@ -214,6 +150,7 @@ class $modify(SuperBufferGameLayer, GJBaseGameLayer) {
             return;
         }
 
+        // Cube ground-state diagnostic.
         if (gameMode == superbuffer::GameMode::Cube) {
             log::info(
                 "SUPERBUFFER: Cube Ground State "
